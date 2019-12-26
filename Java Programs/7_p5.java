@@ -1,0 +1,94 @@
+package dm;
+import java.util.*;
+import java.io.*; 
+
+class temp {
+	double p;
+	String q,r;
+}
+
+class p5 {
+	public static double probability(ArrayList<temp> al,String x) {
+		double sum = 0;
+		for(temp z:al)
+			if((z.q).equals(x))
+				sum++;
+		return sum / al.size();
+	}
+	
+	public static double mean(ArrayList<temp> al) {
+		double sum = 0;
+		for (temp z:al)
+			sum += z.p;
+		return sum / al.size();
+	}
+
+	public static double sd(ArrayList<temp> al,double mean) {
+		double sum = 0;
+		int x = al.size();
+		for (temp z:al)
+			sum += Math.pow((z.p-mean),2);
+		return Math.sqrt(sum/(x*(x-1)));
+	}
+
+	public static void main(String args[]) throws FileNotFoundException, IOException {
+		BufferedReader csv = new BufferedReader(new FileReader(new File("p5.csv")));
+		String data = csv.readLine();
+		ArrayList<temp> y = new ArrayList<>();
+		ArrayList<temp> n = new ArrayList<>();
+		int i=0;
+		while(data != null) {
+			String[] dataarray = data.split(","); 
+			temp res = new temp();
+			res.p = Double.parseDouble(dataarray[0]); res.q = dataarray[1];
+			res.r = dataarray[2];
+			if(dataarray[2].equals("Y"))
+				y.add(res);
+			else
+				n.add(res);
+			data = csv.readLine();
+		}
+		System.out.println("Enter weight(1 - 60) and Shirt size(S/M/L) to find its class");
+		Scanner in = new Scanner(System.in);
+		double x1 = in.nextDouble();
+		String x2 = in.next();
+
+		int t = y.size() + n.size();
+		double p_y = (double)y.size()/(double)t;
+		double p_n = (double)n.size()/(double)t;
+
+		double p1,p2,p3,p4,exp;
+		double mean1 = mean(y);
+		double mean2 = mean(n);
+		double sd1 = sd(y,mean1);
+		double sd2 = sd(n,mean2);
+
+		exp = Math.pow((x1 - mean1), 2)/(2* Math.pow(sd1,2));
+		p3 = Math.exp(-1*exp)/(Math.sqrt(2*3.14)*sd1);
+		exp = Math.pow((x1 - mean2), 2)/(2 *Math.pow(sd2,2));
+		p4 = Math.exp(-1*exp)/(Math.sqrt(2*3.14)*sd2);
+
+		p1 = probability(y,x2);
+		p2 = probability(n,x2);
+		double res1,res2;
+		res1 = p1*p3*p_y;
+		res2 = p2*p4*p_n;
+
+		System.out.println("Class Y");
+		System.out.println("Mean : "+mean1+"\nStandard deviation : "+sd1);
+		System.out.println("size : S Given class"+i+":"+probability(y,"S"));
+		System.out.println("size : M Given class"+i+":"+probability(y,"M"));
+		System.out.println("size : L Given class"+i+":"+probability(y,"L")+"\n");
+
+		System.out.println("Class N");
+		System.out.println("Mean :"+mean2+ "\nStandard deviation : "+sd2);
+		System.out.println("size : S Given class"+i+":"+probability(n,"S"));
+		System.out.println("size : M Given class"+i+":"+probability(n,"M"));
+		System.out.println("size : L Given class"+i+":"+probability(n,"L")+"\n");
+		System.out.println(res1+"\n"+res2);
+		if(res1>res2)
+			System.out.println("Class for weight "+x1+" and Shirt size"+x2+" is : Y");
+		else
+			System.out.println("Class for weight "+x1+" and Shirt size "+x2+" is : N");
+	}
+}
